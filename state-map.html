@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Infrastructure</title>
+
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 80vh;
+    }
+    #facility-details {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+    body {
+      padding: 20px;
+    }
+    #back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: none; /* Initially hidden */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="text-center">Health Infrastructure</h2>
+    <p class="text-muted text-center">Mapping health facilities to identify infrastructure needs and opportunities.</p>
+    <div class="text-center"> <a href="index.html" class="btn btn-sm btn-primary btn-block">&lt;&lt; Back home</a></div>
+
+
+    <div id="map" class="mb-3"></div>
+
+    <div id="facility-details">
+      <h4 class="text-center">Facility Details</h4>
+      <p id="facility-info">Click on a facility marker to see more details here.</p>
+    </div>
+    Data source: <a href="https://www.hfr.health.gov.ng/"><img src="https://www.hfr.health.gov.ng/img/new_logo.png" alt=""></a>
+    <div class="alert alert-info text-center mt-3">
+      <p><strong>Note:</strong> Facilities marked with no ambulance services are recommended for emergency infrastructure upgrades.</p>
+    </div>
+    <h4 class="text-center mt-4">Facility Statistics</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Total Facilities</th>
+          <th>Operational Facilities</th>
+          <th>Non-Operational Facilities</th>
+          <th>Facilities with Ambulance Services</th>
+          <th>Facilities without Ambulance Services</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="total-facilities">0</td>
+          <td id="operational-facilities">0</td>
+          <td id="non-operational-facilities">0</td>
+          <td id="with-ambulance">0</td>
+          <td id="without-ambulance">0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button id="back-to-top" class="btn btn-primary">Back to Top</button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <script>
+
+    // Get the 's' parameter from the URL
+const urlParams = new URLSearchParams(window.location.search);
+const stateKey = urlParams.get('s');  // Example: 'abia', 'nasarawa', etc.
+
+// Create and load the script dynamically
+const script = document.createElement('script');
+script.src = `js/${stateKey}.js`;
+
+// Wait until the script is fully loaded before accessing the data
+script.onload = function() {
+  // Now the facilitiesData should be available
+  console.log(facilitiesData);  // This will now work, since the script is loaded
+
+  // Add markers to the map
+  facilitiesData.forEach(function(facility) {
+    if (facility.latitude && facility.longitude) {
+      // Create a marker
+      var marker = L.marker([facility.latitude, facility.longitude])
+        .addTo(map);
+
+      // On marker click, update the facility details div
+      marker.on('click', function() {
+        showFacilityDetails(facility);
+      });
+    }
+  });
+
+  // Calculate and update statistics
+  calculateStatistics();
+};
+
+script.onerror = function() {
+  console.error(`Failed to load the script for ${stateKey}`);
+};
+
+document.head.appendChild(script);
+
+
+    // Initialize the map
+    var map = L.map('map').setView([8.5, 9.5], 8); 
+
+    // Add the OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Function to generate text-based recommendations for each facility
+    function getFacilityRecommendations(facility) {
+      let recommendations = '';
+
+      if (facility.ambulance_services === 'No') {
+        recommendations += 'This facility needs an ambulance service upgrade.<br>';
+      }
+
+      if (facility.beds < 5) {
+        recommendations += 'This facility could benefit from more beds.<br>';
+      }
+
+      return recommendations ? recommendations : 'No urgent upgrades required.';
+    }
+
+    // Function to update the facility details section
+    function showFacilityDetails(facility) {
+      const facilityInfo = document.getElementById('facility-info');
+
+      facilityInfo.innerHTML = `
+        <h5>${facility.facility_name}</h5>
+        <p><strong>Location:</strong> ${facility.physical_location}</p>
+        <p><strong>LGA:</strong> ${facility.lga}</p>
+        <p><strong>Ward:</strong> ${facility.ward}</p>
+        <p><strong>Beds:</strong> ${facility.beds}</p>
+        <p><strong>Attendants:</strong> ${facility.attendants}</p>
+        <p><strong>Outpatient Services:</strong> ${facility.outpatient}</p>
+        <p><strong>Ambulance Services:</strong> ${facility.ambulance_services}</p>
+        <p><strong>Operation Status:</strong> ${facility.operation_status}</p>
+        <p><strong>Recommendations:</strong><br>${getFacilityRecommendations(facility)}</p>
+      `;
+
+      // Scroll to the facility details section
+      document.getElementById('facility-details').scrollIntoView({ behavior: 'smooth' });
+      // Show the "Back to Top" button
+      document.getElementById('back-to-top').style.display = 'block';
+    }
+
+    function calculateStatistics() {
+      const totalFacilities = facilitiesData.length;
+      const operationalFacilities = facilitiesData.filter(f => f.operation_status === 'Operational').length;
+      const nonOperationalFacilities = totalFacilities - operationalFacilities;
+      const withAmbulance = facilitiesData.filter(f => f.ambulance_services === 'Yes').length;
+      const withoutAmbulance = totalFacilities - withAmbulance;
+
+      // Update the table with statistics
+      document.getElementById('total-facilities').textContent = totalFacilities;
+      document.getElementById('operational-facilities').textContent = operationalFacilities;
+      document.getElementById('non-operational-facilities').textContent = nonOperationalFacilities;
+      document.getElementById('with-ambulance').textContent = withAmbulance;
+      document.getElementById('without-ambulance').textContent = withoutAmbulance;
+    }
+
+    // Show or hide the "Back to Top" button based on scroll position
+    window.addEventListener('scroll', function() {
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        document.getElementById('back-to-top').style.display = 'block';
+      } else {
+        document.getElementById('back-to-top').style.display = 'none';
+      }
+    });
+
+    document.getElementById('back-to-top').addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

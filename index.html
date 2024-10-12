@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highcharts Nigeria Map</title>
+    <!-- Highcharts and Highmaps library -->
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+
+    <style>
+        #container {
+            height: 500px;
+            min-width: 310px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            margin-top: 10em;
+            text-align: center;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+<div id="container"></div>
+
+<script>
+// JavaScript code to create the map
+(async () => {
+    const topology = await fetch(
+        'https://code.highcharts.com/mapdata/countries/ng/ng-all.topo.json'
+    ).then(response => response.json());
+
+    // Sample data linked to the map by state keys
+    const data = [
+        ['ng-ri', 10], ['ng-kt', 11], ['ng-so', 12], ['ng-za', 13],
+        ['ng-yo', 14], ['ng-ke', 15], ['ng-ad', 16], ['ng-bo', 17],
+        ['ng-ak', 18], ['ng-ab', 19], ['ng-im', 20], ['ng-by', 21],
+        ['ng-be', 22], ['ng-cr', 23], ['ng-ta', 24], ['ng-kw', 25],
+        ['ng-la', 26], ['ng-ni', 27], ['ng-fc', 28], ['ng-og', 29],
+        ['ng-on', 30], ['ng-ek', 31], ['ng-os', 32], ['ng-oy', 33],
+        ['ng-an', 34], ['ng-ba', 35], ['ng-go', 36], ['ng-de', 37],
+        ['ng-ed', 38], ['ng-en', 39], ['ng-eb', 40], ['ng-kd', 41],
+        ['ng-ko', 42], ['ng-pl', 43], ['ng-na', 44], ['ng-ji', 45],
+        ['ng-kn', 46]
+    ];
+
+    // Create the Highcharts map
+    const chart = Highcharts.mapChart('container', {
+        chart: {
+            map: topology
+        },
+
+        title: {
+            text: 'Map of Nigeria'
+        },
+
+        subtitle: {
+            text: 'Source map: <a href="https://code.highcharts.com/mapdata/countries/ng/ng-all.topo.json">Nigeria</a>'
+        },
+
+        mapNavigation: {
+            enabled: true,
+            buttonOptions: {
+                verticalAlign: 'bottom'
+            }
+        },
+
+        colorAxis: {
+            min: 0
+        },
+
+        plotOptions: {
+            series: {
+                point: {
+                    events: {
+                        click: function () {
+                            // Zoom into the clicked state
+                            const chart = this.series.chart;
+                            chart.mapZoom(0.5, this.plotX, this.plotY);
+
+                            // Redirect to a new page with state-specific information
+                            // Modify the URL based on the state's name or key
+                            const stateKey = this['hc-key'];
+                            window.setTimeout(() => {
+                                window.location.href = `state-map.html?s=${stateKey}`; 
+                            }, 1000); // Add a small delay to allow zoom animation
+                        }
+                    }
+                }
+            }
+        },
+
+        series: [{
+            data: data,
+            name: 'Random data',
+            states: {
+                hover: {
+                    color: '#BADA55'
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                format: '{point.name}'
+            }
+        }]
+    });
+})();
+</script>
+
+</body>
+</html>
