@@ -36,6 +36,7 @@
     <h3 class="text-center" id="state-name"></h3>
     <p class="text-center" id="state-population"></p>
     <p class="text-muted text-center">Mapping health facilities to identify infrastructure needs and opportunities.</p>
+    <p class="text-center">Click on a facility marker to see more..</p>
     <div class="text-center"> <a href="index.html" class="btn btn-sm btn-primary btn-block">&lt;&lt; Back home</a></div>
 
 
@@ -276,12 +277,7 @@ const stateKey = urlParams.get('s');
 const script = document.createElement('script');
 script.src = `js/${stateKey}.js`;
 
-// Wait until the script is fully loaded before accessing the data
 script.onload = function() {
-  // Now the facilitiesData should be available
-  // console.log(facilitiesData);  // This will now work, since the script is loaded
-
-  // Add markers to the map
   facilitiesData.forEach(function(facility) {
     if (facility.latitude && facility.longitude) {
       // Create a marker
@@ -380,7 +376,6 @@ document.head.appendChild(script);
       document.getElementById('without-ambulance').textContent = withoutAmbulance;
     }
 
-    // Show or hide the "Back to Top" button based on scroll position
     window.addEventListener('scroll', function() {
       if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
         document.getElementById('back-to-top').style.display = 'block';
