@@ -33,6 +33,8 @@
 
   <div class="container">
     <h2 class="text-center">Health Infrastructure</h2>
+    <h3 class="text-center" id="state-name"></h3>
+    <p class="text-center" id="state-population"></p>
     <p class="text-muted text-center">Mapping health facilities to identify infrastructure needs and opportunities.</p>
     <div class="text-center"> <a href="index.html" class="btn btn-sm btn-primary btn-block">&lt;&lt; Back home</a></div>
 
@@ -43,7 +45,7 @@
       <h4 class="text-center">Facility Details</h4>
       <p id="facility-info">Click on a facility marker to see more details here.</p>
     </div>
-    Data source: <a href="https://www.hfr.health.gov.ng/"><img src="https://www.hfr.health.gov.ng/img/new_logo.png" alt=""></a>
+    Data source: <a href="https://www.hfr.health.gov.ng/img/new_logo.png"><img src="https://www.hfr.health.gov.ng/img/new_logo.png" alt=""></a>
     <div class="alert alert-info text-center mt-3">
       <p><strong>Note:</strong> Facilities marked with no ambulance services are recommended for emergency infrastructure upgrades.</p>
     </div>
@@ -76,9 +78,199 @@
 
   <script>
 
+const stateCoordinates = {
+    'ng-ab': { lat: 5.52, lng: 7.48 },
+    'ng-ad': { lat: 9.3, lng: 12.5 },
+    'ng-ak': { lat: 5.05, lng: 7.93 },
+    'ng-an': { lat: 6.2, lng: 7.0 },
+    'ng-ba': { lat: 10.5, lng: 10.0 },
+    'ng-by': { lat: 4.92, lng: 6.27 },
+    'ng-be': { lat: 7.75, lng: 8.53 },
+    'ng-bo': { lat: 11.83, lng: 13.15 },
+    'ng-cr': { lat: 4.97, lng: 8.33 },
+    'ng-de': { lat: 6.2, lng: 6.75 },
+    'ng-eb': { lat: 6.33, lng: 8.1 },
+    'ng-ed': { lat: 6.33, lng: 5.6 },
+    'ng-ek': { lat: 7.63, lng: 5.22 },
+    'ng-en': { lat: 6.45, lng: 7.5 },
+    'ng-fc': { lat: 9.08, lng: 7.53 },
+    'ng-go': { lat: 10.28, lng: 11.17 },
+    'ng-im': { lat: 5.48, lng: 7.03 },
+    'ng-ji': { lat: 12.75, lng: 9.5 },
+    'ng-kd': { lat: 10.52, lng: 7.44 },
+    'ng-kn': { lat: 12.0, lng: 8.52 },
+    'ng-kt': { lat: 12.98, lng: 7.6 },
+    'ng-ke': { lat: 12.45, lng: 4.2 },
+    'ng-ko': { lat: 7.8, lng: 6.73 },
+    'ng-kw': { lat: 8.5, lng: 4.55 },
+    'ng-la': { lat: 6.58, lng: 3.38 },
+    'ng-na': { lat: 8.5, lng: 8.33 },
+    'ng-ni': { lat: 9.6, lng: 6.55 },
+    'ng-og': { lat: 7.15, lng: 3.35 },
+    'ng-on': { lat: 7.25, lng: 5.2 },
+    'ng-os': { lat: 7.77, lng: 4.57 },
+    'ng-oy': { lat: 7.38, lng: 3.9 },
+    'ng-pl': { lat: 9.93, lng: 8.88 },
+    'ng-ri': { lat: 4.8, lng: 7.0 },
+    'ng-so': { lat: 13.07, lng: 5.24 },
+    'ng-ta': { lat: 8.88, lng: 11.37 },
+    'ng-yo': { lat: 11.75, lng: 11.97 },
+    'ng-za': { lat: 12.1222, lng: 6.2236 }
+  };
+
+const population = {
+  "ng-ri": {
+    "state": "Rivers",
+    "population": 7039928
+  },
+  "ng-kt": {
+    "state": "Katsina",
+    "population": 7831319
+  },
+  "ng-so": {
+    "state": "Sokoto",
+    "population": 4998000
+  },
+  "ng-za": {
+    "state": "Zamfara",
+    "population": 4515427
+  },
+  "ng-yo": {
+    "state": "Yobe",
+    "population": 3294137
+  },
+  "ng-ke": {
+    "state": "Kebbi",
+    "population": 4440050
+  },
+  "ng-ad": {
+    "state": "Adamawa",
+    "population": 4248436
+  },
+  "ng-bo": {
+    "state": "Borno",
+    "population": 5860188
+  },
+  "ng-ak": {
+    "state": "Akwa Ibom",
+    "population": 5452377
+  },
+  "ng-ab": {
+    "state": "Abia",
+    "population": 3727347
+  },
+  "ng-im": {
+    "state": "Imo",
+    "population": 5408756
+  },
+  "ng-by": {
+    "state": "Bayelsa",
+    "population": 2277961
+  },
+  "ng-be": {
+    "state": "Benue",
+    "population": 5741815
+  },
+  "ng-cr": {
+    "state": "Cross River",
+    "population": 3866269
+  },
+  "ng-ta": {
+    "state": "Taraba",
+    "population": 3066834
+  },
+  "ng-kw": {
+    "state": "Kwara",
+    "population": 3192895
+  },
+  "ng-la": {
+    "state": "Lagos",
+    "population": 12550598
+  },
+  "ng-ni": {
+    "state": "Niger",
+    "population": 5556247
+  },
+  "ng-fc": {
+    "state": "Federal Capital Territory",
+    "population": 3564126
+  },
+  "ng-og": {
+    "state": "Ogun",
+    "population": 5217716
+  },
+  "ng-on": {
+    "state": "Ondo",
+    "population": 4716051
+  },
+  "ng-ek": {
+    "state": "Ekiti",
+    "population": 3270798
+  },
+  "ng-os": {
+    "state": "Osun",
+    "population": 4705589
+  },
+  "ng-oy": {
+    "state": "Oyo",
+    "population": 7840068
+  },
+  "ng-an": {
+    "state": "Anambra",
+    "population": 5527809
+  },
+  "ng-ba": {
+    "state": "Bauchi",
+    "population": 6937314
+  },
+  "ng-go": {
+    "state": "Gombe",
+    "population": 3256902
+  },
+  "ng-de": {
+    "state": "Delta",
+    "population": 5663362
+  },
+  "ng-ed": {
+    "state": "Edo",
+    "population": 4235505
+  },
+  "ng-en": {
+    "state": "Enugu",
+    "population": 4411919
+  },
+  "ng-eb": {
+    "state": "Ebonyi",
+    "population": 2880585
+  },
+  "ng-kd": {
+    "state": "Kaduna",
+    "population": 9252366
+  },
+  "ng-ko": {
+    "state": "Kogi",
+    "population": 4473490
+  },
+  "ng-pl": {
+    "state": "Plateau",
+    "population": 4200442
+  },
+  "ng-na": {
+    "state": "Nassarawa",
+    "population": 2523395
+  },
+  "ng-ji": {
+    "state": "Jigawa",
+    "population": 5528163
+  },
+  "ng-kn": {
+    "state": "Kano",
+    "population": 13076892
+  }
+};
     // Get the 's' parameter from the URL
 const urlParams = new URLSearchParams(window.location.search);
-const stateKey = urlParams.get('s');  // Example: 'abia', 'nasarawa', etc.
+const stateKey = urlParams.get('s'); 
 
 // Create and load the script dynamically
 const script = document.createElement('script');
@@ -87,7 +279,7 @@ script.src = `js/${stateKey}.js`;
 // Wait until the script is fully loaded before accessing the data
 script.onload = function() {
   // Now the facilitiesData should be available
-  console.log(facilitiesData);  // This will now work, since the script is loaded
+  // console.log(facilitiesData);  // This will now work, since the script is loaded
 
   // Add markers to the map
   facilitiesData.forEach(function(facility) {
@@ -114,8 +306,21 @@ script.onerror = function() {
 document.head.appendChild(script);
 
 
-    // Initialize the map
-    var map = L.map('map').setView([8.5, 9.5], 8); 
+   // Check if the state key is valid and exists in the mapping
+  if (stateCoordinates[stateKey]) {
+    const { lat, lng } = stateCoordinates[stateKey];
+    
+    document.getElementById('state-population').innerHTML = 'Population: '+ population[stateKey].population.toLocaleString('en-US');;
+    document.getElementById('state-name').innerHTML = population[stateKey].state + ' state'
+    // Set the view to the specific state's coordinates
+    var map = L.map('map').setView([lat, lng], 8);
+  } else {
+    console.log('22kkekekkeke2')
+
+    // Default coordinates (Nasarawa) if no valid stateKey is found
+    var map = L.map('map').setView([8.5, 8.33], 8);
+  }
+
 
     // Add the OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
